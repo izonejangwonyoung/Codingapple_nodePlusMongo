@@ -21,10 +21,34 @@ MongoClient.connect(process.env.mongo_address, function (에러, client) {
     });
 });
 
+// app.post('/add', function (요청, 응답) {
+//     db.collection('counter').findOne({name: '게시물갯수'}, function (에러, 결과) {
+//         var 총게시물갯수 = 결과.totalPost;
+//         db.collection('post').insertOne({_id: (총게시물갯수 + 1), 제목: 요청.body.title, 날짜: 요청.body.date}, function () {
+//             console.log('저장완료')
+//             응답.send('전송완료')
+//         })
+//     })
+//
+// app.post('/add', function (요청, 응답) {
+//     응답.send('전송완료')
+//     db.collection('post').insertOne({제목: 요청.body.title, 날짜: 요청.body.date}, function () {
+//         console.log('저장완료')
+//     })
+// })
 app.post('/add', function (요청, 응답) {
-    응답.send('전송완료')
-    db.collection('post').insertOne({제목: 요청.body.title, 날짜: 요청.body.date}, function () {
-        console.log('저장완료')
+    db.collection('counter').findOne({name: '게시물갯수'}, function (에러, 결과) {
+        var 총게시물갯수 = 결과.totalPost
+
+        db.collection('post').insertOne({_id: 총게시물갯수 + 1, 제목: 요청.body.title, 날짜: 요청.body.date}, function (에러, 결과) {
+            db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: 1}}, function (에러, 결과) {
+                if (에러) {
+                    return console.log(에러)
+                }
+                응답.send('전송완료');
+            })
+        })
+
     })
 })
 
@@ -38,7 +62,24 @@ app.get('/list', function (요청, 응답) {
 
     db.collection('post').find().toArray(function (에러, 결과) {
         console.log(결과);
-        응답.render('list.ejs',{posts: 결과});
+        응답.render('list.ejs', {posts: 결과});
     });///모든 데이터 가져오기 문법
 
+
+})
+
+
+app.delete('/delete', function (요청, 응답) {
+    요청.body._id = parseInt(요청.body._id)
+    db.collection('post').deleteOne(요청.body,function (에러,결과){
+        console.log('삭제완료')
+    });
+    db.collection('counter').updateOne({name: '게시물갯수'}, {$set: {totalPost: 0}}),function (요청,응답){
+        console.log("카운트 초기화 완료")
+    }, function (에러, 응답) {
+        if (에러) {
+            return console.log(에러)
+        }
+        응답.send('전체삭제완료')
+    }
 })
