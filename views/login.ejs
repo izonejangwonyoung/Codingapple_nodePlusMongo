@@ -49,21 +49,21 @@
     </div>
 </nav>
 
-<h4 class="container mt-4"><strong>글 작성페이지</strong></h4>
+<h4 class="container mt-4"><strong>로그인 페이지</strong></h4>
 
 <div class="container mt-3">
-    <form action="/edit?_method=PUT" method="post">
+    <form action="/login" method="post">
         <div class="form-group">
-            <label>오늘의 할일</label>
-            <input value="<%= edit._id %>" name="id" style="display : none">
-            <input type="text" name="title" class="form-control" value="<%= edit.제목%>">
+            <label>ID</label>
+            <input type="text" name="id" class="form-control">
         </div>
         <div class="form-group">
-            <label>날짜</label>
-            <input type="text" class="form-control" name="date" value="<%= edit.날짜%>">
+            <label>Password</label>
+            <input type="text" class="form-control" name="pw">
         </div>
-        <button type="submit" class="btn btn-outline-secondary">Submit</button>
+        <button type="submit" class="btn btn-outline-secondary">LOGIN</button>
     </form>
+
 
 
 </div>
