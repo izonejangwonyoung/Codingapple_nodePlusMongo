@@ -13,8 +13,17 @@ const session = require('express-session');
 const createHashedPassword = (password) => {
     return crypto.createHash("sha512").update(password).digest("base64");
 };
-
+app.use(session({ secret: 'anything' }));
+app.use(passport.initialize());
+app.use(passport.session());
+var bkfd2Password = require('pbkdf2-password');
+var hasher = bkfd2Password();
+app.use(express.json());
+var cors = require('cors')
+app.use(cors());
+// 암호화
 app.use(session({secret: '비밀코드', resave: true, saveUninitialized: false}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride('_method'))
@@ -127,7 +136,7 @@ app.put('/edit', function (요청, 응답) {
 });
 app.get('/home', function (req, res) {
     db.collection('counter').findOne(function (error, result) {
-        res.render('home.ejs', {data: result})
+        res.render('home.ejs', {data: result,user:req.user})
     })
 })
 
@@ -141,16 +150,20 @@ app.post('/login', passport.authenticate('local', {failureRedirect: '/fail'}), f
 app.get('/mypage', isLogin, function (req, res) {
     res.render('mypage.ejs', {user: req.user})
 })
+app.get('/fail',function (req, res){
+    res.render('fail')
+})
 
 function isLogin(req, res, next) {
-    console.log(req.user)
+    console.log("req.user= "+req.user)
     if (req.user) {
         next()
     } else {
         res.send('로그인안하셨는데요?')
     }
-}
 
+}
+module.exports = app;
 
 app.get("/logout", function (req, res, next) {
     req.logout(function (err) {
@@ -174,17 +187,15 @@ app.get('/join', function (req, res) {
 app.post('/join', function (req, res) {
     // const hashId = crypto.createHash('sha512').update(req.body.id + salt).digest('hex');
     // const hashPw = crypto.createHash('sha512').update(req.body.pw + salt).digest('hex');
-
-    crypto.pbkdf2(req.body.id, "salt", 65536, 32, "sha512", (err, derivedKey) => {
-        if (err) {
-            throw err;
-        }
-        //에러 발생시 핸들링
-        console.log(derivedKey.toString("hex"));
-    });
     // let cryptedId=createHashedPassword(req.body.id)
-    db.collection('login').insertOne({id: req.body.id, pw: req.body.pw})
-    res.send('complete')
+    hasher({
+        password: req.body.pw
+    }, (err, pass, salt, hash) => {
+        db.collection('login').insertOne({id: req.body.id, pw: hash,salt:salt})
+    })
+    // res.send('complete')
+    res.render('logincomplete.ejs')
+
 })
 
 
@@ -194,17 +205,34 @@ passport.use(new LocalStrategy({
     session: true,
     passReqToCallback: false,
 }, function (입력한아이디, 입력한비번, done) {
-    //console.log(입력한아이디, 입력한비번);
+    console.log(입력한아이디, 입력한비번);
     db.collection('login').findOne({id: 입력한아이디}, function (에러, 결과) {
+        console.log(결과)
         if (에러) return done(에러)
-
         if (!결과) return done(null, false, {message: '존재하지않는 아이디요'})
-        if (입력한비번 == 결과.pw) {
-            return done(null, 결과)
-        } else {
-            return done(null, false, {message: '비번틀렸어요'})
-        }
-    })
+
+
+        hasher({ password: 입력한비번, salt: 결과.salt }, (err, pass, salt, hash) => {
+            if(결과.pw === hash){
+                console.log("같은 패스워드")
+               return done(null,결과)
+            }
+            else{
+                console.log("다른 패스워드")
+                console.log('hash: '+hash)
+                console.log('결과.hash:' +결과.pw)
+                console.log("입력한비번: "+입력한비번)
+               return done(null,false,{message:'비번 틀림'})
+            }
+        });
+            // if (입력한비번 == 결과.pw) {
+            //     return done(null, 결과)
+            // } else {
+            //     return done(null, false, {message: '비번틀렸어요'})
+            // }
+        })
+
+
 }));
 
 passport.serializeUser(function (user, done) {

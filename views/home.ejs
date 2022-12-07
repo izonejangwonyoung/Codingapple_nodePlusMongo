@@ -30,7 +30,11 @@
             </li>
              <li class="nav-item">
                 <a class="nav-link" href="/login">login</a>
-            </li><li class="nav-item dropdown">
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/join">join</a>
+            </li>
+            <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
                     Dropdown
@@ -46,6 +50,12 @@
                 <a class="nav-link disabled" href="#">Disabled</a>
             </li>
         </ul>
+        <% if (user) { %>
+            <button type="button" class="btn btn-primary" style="margin-right: 10px" onclick={window.location.href="/logout"}>LOGOUT</button>
+        <% }else {%>
+            <button type="button" class="btn btn-primary" style="margin-right: 10px" onclick={window.location.href="/login"}>LOGIN</button>
+        <% } %>
+
         <form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
@@ -59,6 +69,11 @@
     <li class="list-group-item">
     현재 등록된 글의 수는 <%= data.totalPost%> 개입니다.
     </li>
+    <% if (user) { %> <h1>로그인 상태입니다.</h1> <% } %>
+
+
+
+
 </ul>
 </body>
 </html>
