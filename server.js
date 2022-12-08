@@ -74,17 +74,17 @@ app.post('/add', function (요청, 응답) {
     })
 })
 
-app.get('/write', function (요청, 응답) {
-    응답.sendFile(__dirname + '/write.html')
+app.get('/write', isLogin,function (req, res) {
+res.render('write.ejs',{user:req.user})
 })
 
 
-app.get('/list', function (요청, 응답) {
+app.get('/list', isLogin,function (요청, 응답) {
 
 
     db.collection('post').find().toArray(function (에러, 결과) {
         console.log(결과);
-        응답.render('list.ejs', {posts: 결과});
+        응답.render('list.ejs', {posts: 결과,user:요청.user});
     });///모든 데이터 가져오기 문법
 
 
@@ -134,14 +134,14 @@ app.put('/edit', function (요청, 응답) {
 
     });
 });
-app.get('/home', function (req, res) {
+app.get('/home',isLogin ,function (req, res) {
     db.collection('counter').findOne(function (error, result) {
         res.render('home.ejs', {data: result,user:req.user})
     })
 })
 
 app.get('/login', function (req, res) {
-    res.render('login.ejs')
+    res.render('login.ejs',{user:req.user})
 })
 app.post('/login', passport.authenticate('local', {failureRedirect: '/fail'}), function (req, res) {
     res.redirect('/home')
@@ -159,7 +159,7 @@ function isLogin(req, res, next) {
     if (req.user) {
         next()
     } else {
-        res.send('로그인안하셨는데요?')
+        res.redirect('login')
     }
 
 }
@@ -170,7 +170,7 @@ app.get("/logout", function (req, res, next) {
         if (err) {
             return next(err);
         }
-        res.redirect("/home");
+        res.redirect("/login");
     });
 });
 // app.get('/logout', function (req, res, next) {
@@ -182,7 +182,7 @@ app.get("/logout", function (req, res, next) {
 //     res.redirect('/home');
 // });
 app.get('/join', function (req, res) {
-    res.render('join.ejs')
+    res.render('join.ejs',{user:req.user})
 })
 app.post('/join', function (req, res) {
     // const hashId = crypto.createHash('sha512').update(req.body.id + salt).digest('hex');

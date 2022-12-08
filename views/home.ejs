@@ -22,38 +22,30 @@
             <li class="nav-item active">
                 <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
             </li>
+            <% if (user){ %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/write">Write</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/mypage">MyPage</a>
+                </li>
+            <% } %>
             <li class="nav-item">
-                <a class="nav-link" href="/write">Write</a>
+                <a class="nav-link" href="/join">Join</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/mypage">MyPage</a>
-            </li>
-             <li class="nav-item">
-                <a class="nav-link" href="/login">login</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/join">join</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
-                    Dropdown
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" href="#">Disabled</a>
-            </li>
+
+            <!--            <li class="nav-item">-->
+            <!--                <a class="nav-link disabled" href="#">Disabled</a>-->
+            <!--            </li>-->
         </ul>
         <% if (user) { %>
-            <button type="button" class="btn btn-primary" style="margin-right: 10px" onclick={window.location.href="/logout"}>LOGOUT</button>
-        <% }else {%>
-            <button type="button" class="btn btn-primary" style="margin-right: 10px" onclick={window.location.href="/login"}>LOGIN</button>
+            <button type="button" class="btn btn-primary" style="margin-right: 10px"
+                    onclick={window.location.href="/logout"}>LOGOUT
+            </button>
+        <% }else { %>
+            <button type="button" class="btn btn-primary" style="margin-right: 10px"
+                    onclick={window.location.href="/login"}>LOGIN
+            </button>
         <% } %>
 
         <form class="form-inline my-2 my-lg-0">
@@ -65,16 +57,16 @@
 
 <h4 class="container mt-4"><strong>글 확인페이지</strong></h4>
 
-<ul class="list-group">
-    <li class="list-group-item">
-    현재 등록된 글의 수는 <%= data.totalPost%> 개입니다.
-    </li>
-    <% if (user) { %> <h1>로그인 상태입니다.</h1> <% } %>
-
-
-
-
-</ul>
+<% if (user) { %>
+    <h1><%= user.id%>님, 환영합니다!</h1>
+    <ul class="list-group">
+        <li class="list-group-item">
+            현재 등록된 글의 수는 <%= data.totalPost %> 개입니다.
+        </li>
+    </ul>
+<% }else{ %>
+    <h2>로그인하고 더 많은 정보를 만나보세요!</h2>
+<% } %>
 </body>
 </html>
 
