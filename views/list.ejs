@@ -57,6 +57,13 @@
 
 <h4 class="container mt-4"><strong>글 확인페이지</strong></h4>
 
+<div class="container input-group mb-2">
+    <input class="form-control" id="search-input">
+    <button class="input-group-append btn btn-danger" id="search">검색</button>
+</div>
+
+
+
 <ul class="list-group">
     <% for (var i = 0; i < posts.length; i++){ %>
         <li class="list-group-item">
@@ -85,5 +92,11 @@
         }).always(function (xhr,status){
             $("#text").html("요청이 완료되었습니다.!!")
         })
+    });
+</script>
+<script>
+    $('#search').click(function(){
+        var 입력한값 = $('#search-input').val();
+        window.location.replace('/search?value=' + 입력한값)
     });
 </script>

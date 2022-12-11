@@ -1,11 +1,7 @@
 const express = require('express')
 const app = express()
-app.use(express.urlencoded({extended: true}));
 const MongoClient = require('mongodb').MongoClient
-require('dotenv').config();
-app.set('view engine', 'ejs')
 const crypto = require('crypto');
-let db;
 const methodOverride = require('method-override')
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -13,17 +9,25 @@ const session = require('express-session');
 const createHashedPassword = (password) => {
     return crypto.createHash("sha512").update(password).digest("base64");
 };
+var bkfd2Password = require('pbkdf2-password');
+var hasher = bkfd2Password();
+var cors = require('cors')
+const bodyParser = require("express");
+let db;
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extends: true }))
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
+require('dotenv').config();
+app.set('view engine', 'ejs')
 app.use(session({ secret: 'anything' }));
 app.use(passport.initialize());
 app.use(passport.session());
-var bkfd2Password = require('pbkdf2-password');
-var hasher = bkfd2Password();
-app.use(express.json());
-var cors = require('cors')
 app.use(cors());
 // 암호화
 app.use(session({secret: '비밀코드', resave: true, saveUninitialized: false}));
 
+module.exports = app;
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride('_method'))
@@ -38,8 +42,8 @@ MongoClient.connect(process.env.mongo_address, function (에러, client) {
     //     console.log('저장완료');
     // });
 
-    app.listen(8080, function () {
-        console.log('listening on 8080')
+    app.listen(8080,function () {
+        console.log('listening on 16000')
     });
 });
 
@@ -62,7 +66,7 @@ app.post('/add', function (요청, 응답) {
     db.collection('counter').findOne({name: '게시물갯수'}, function (에러, 결과) {
         var 총게시물갯수 = 결과.totalPost
 
-        db.collection('post').insertOne({_id: 총게시물갯수 + 1, 제목: 요청.body.title, 날짜: 요청.body.date}, function (에러, 결과) {
+        db.collection('post').insertOne({_id: 총게시물갯수 + 1,작성자:요청.user._id ,제목: 요청.body.title, 내용:요청.body.date,날짜: new Date()}, function (에러, 결과) {
             db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: 1}}, function (에러, 결과) {
                 if (에러) {
                     return console.log(에러)
@@ -92,20 +96,46 @@ app.get('/list', isLogin,function (요청, 응답) {
 
 
 app.delete('/delete', function (요청, 응답) {
-    요청.body._id = parseInt(요청.body._id)
-    db.collection('post').deleteOne(요청.body, function (에러, 결과) {
-            console.log('삭제완료')
-            응답.redirect('/list')
+    요청.body._id = parseInt(요청.body._id);
+    db.collection('post').findOne({_id: 요청.body._id}, function (err, result) {
+
+
+        // db.collection('post').deleteOne({_id: 요청.body._id, 작성자: 요청.user._id}, function (에러, 결과) {
+        //         // console.log("글 작성한 사람: "+요청.body.작성자)
+        //         console.log("글 작성한 사람: " + result.작성자)
+        //         console.log("삭제버튼누른사람:" + 요청.user._id)
+        //         console.log("삭제id:" + 요청.body._id)
+
+
+            if (result.작성자 == 요청.user._id) {
+                db.collection('post').deleteOne({_id: 요청.body._id, 작성자: 요청.user._id}, function (에러, 결과) {
+                    // console.log("글 작성한 사람: "+요청.body.작성자)
+                    console.log("글 작성한 사람: " + result.작성자)
+                    console.log("삭제버튼누른사람:" + 요청.user._id)
+                    console.log("삭제id:" + 요청.body._id)
+                })
+                db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
+                    console.log("카운트 초기화 완료")
+                }, function (에러, 응답) {
+                    if (에러) {
+                        return console.log(에러)
+                    }})
+                    console.log("글 주인")
+                console.log("삭제완료")
+            } else {
+                console.log('글주인X')
+                console.log('삭제불가')
+            }
+            }
+        );
+        // db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
+        //     console.log("카운트 초기화 완료")
+        // }, function (에러, 응답) {
+        //     if (에러) {
+        //         return console.log(에러)
+        //     })
         }
-    );
-    db.collection('counter').updateOne({name: '게시물갯수'}, {$set: {totalPost: 0}}), function (요청, 응답) {
-        console.log("카운트 초기화 완료")
-    }, function (에러, 응답) {
-        if (에러) {
-            return console.log(에러)
-        }
-    }
-})
+    )
 
 app.get('/detail/:id', function (요청, 응답) {
     db.collection('post').findOne({
@@ -153,6 +183,27 @@ app.get('/mypage', isLogin, function (req, res) {
 app.get('/fail',function (req, res){
     res.render('fail')
 })
+app.get('/search',(req, res)=>{
+    console.log(req.query.value)
+    var 검색조건 = [
+        {
+            $search: {
+                index: 'titleSearch',
+                text: {
+                    query: req.query.value,
+                    path: '제목'  // 제목날짜 둘다 찾고 싶으면 ['제목', '날짜']
+                }
+            }
+        }
+    ]
+console.log("req.query="+req.query)
+    db.collection('post').aggregate(검색조건).toArray((err,result)=>{
+    console.log("result="+result)
+    res.render('search.ejs',{result:result,user:req.user})
+})
+
+})
+
 
 function isLogin(req, res, next) {
     console.log("req.user= "+req.user)
@@ -163,7 +214,6 @@ function isLogin(req, res, next) {
     }
 
 }
-module.exports = app;
 
 app.get("/logout", function (req, res, next) {
     req.logout(function (err) {
