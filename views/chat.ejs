@@ -1,0 +1,106 @@
+<style>
+    .chat-content {
+        height: 450px;
+        overflow-y: scroll;
+        padding: 10px;
+    }
+    .chat-content li {
+        margin-top: 10px;
+        list-style: none;
+    }
+    .text-small {
+        font-size: 12px;
+        color: gray;
+        margin-bottom: 0;
+    }
+    .chat-box {
+        background: #eee;
+        padding: 5px;
+        border-radius: 5px;
+        float: left;
+    }
+    .mine {
+        float: right;
+    }
+
+</style>
+
+<div class="container p-4 detail">
+
+    <div class="row">
+        <div class="col-3">
+            <ul class="list-group chat-list">
+
+                <% for (var i=0; i < data.length ; i++){ %>
+                    <li class="list-group-item" data-id="<%= data[i]._id %>">
+                        <h6> <%= data[i].title %> </h6>
+                        <h6 class="text-small"> <%= data[i].member[0] %> </h6>
+                    </li>
+                <% } %>
+
+
+            </ul>
+
+        </div>
+
+        <div class="col-9 p-0">
+            <div class="chat-room">
+                <ul class="list-group chat-content">
+                    <li><span class="chat-box">채팅방1 내용</span></li>
+                    <li><span class="chat-box mine">채팅방1 내용</span></li>
+                </ul>
+                <div class="input-group">
+                    <input class="form-control" id="chat-input">
+                    <button class="btn btn-secondary" id="send">전송</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+    var 지금누른채팅방id;
+    $('#send').click(function(){
+        var 채팅내용 = $('#chat-input').val();   //1, 2
+        var 보낼거 = {
+            parent: 지금누른채팅방id,
+            content: 채팅내용,
+        };
+
+        //3
+        $.post('/message', 보낼거).then((a) => {
+            console.log(a)
+        });
+
+    });
+
+    </script>
+<script>
+    //4
+
+    $('.list-group-item').click(function (){
+        $(this).css('background-color', 'lightpink');
+        지금누른채팅방id = $(this).attr('data-id');
+    });
+
+    var eventSource;   //일단변수
+
+    $('.list-group-item').click(function(){
+        지금누른채팅방id = this.dataset.id;
+        $('.chat-content').html('') //일단 메세지들 전부 비우기
+
+        //프론트엔드에서 실시간 소통채널 여는법
+        eventSource = new EventSource('/message/' + 지금누른채팅방id);
+        eventSource.addEventListener('test', function (e){
+            console.log(e.data);
+            var 가져온거 = JSON.parse(e.data);
+            가져온거.forEach((a) => {
+                $('.chat-content').append(`<li><span class="chat-box">${a.content}</span></li>`)
+        });
+        });
+    });
+
+
+
+</script>

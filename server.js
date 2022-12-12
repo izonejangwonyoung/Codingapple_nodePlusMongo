@@ -13,6 +13,7 @@ var bkfd2Password = require('pbkdf2-password');
 var hasher = bkfd2Password();
 var cors = require('cors')
 const bodyParser = require("express");
+const {ObjectId} = require("mongodb");
 let db;
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extends: true }))
@@ -42,7 +43,7 @@ MongoClient.connect(process.env.mongo_address, function (에러, client) {
     //     console.log('저장완료');
     // });
 
-    app.listen(8080,function () {
+    app.listen(16000,function () {
         console.log('listening on 16000')
     });
 });
@@ -164,6 +165,70 @@ app.put('/edit', function (요청, 응답) {
 
     });
 });
+
+app.post('/chat',function (req,res){
+    var 저장할거 = {
+        title : req.user.id+'가 생성한 채팅방',
+        member : [ObjectId(req.body.대상id),req.user._id],
+        date : new Date()
+    }
+
+    db.collection('chatroom').insertOne(저장할거).then(function(결과){
+        res.send('저장완료')
+    });
+});
+app.get('/chat',isLogin,function (req,res){
+    db.collection('chatroom').find({ member : req.user._id }).toArray().then((결과)=>{
+        console.log(결과);
+        ///결과가 어레이 형식으로 들어옴
+        console.log(결과[0].date);
+        res.render('chat.ejs', {data : 결과, user:req.user})
+    })
+})
+
+app.post('/message', isLogin, function(요청, 응답){
+    var 저장할거 = {
+        parent : 요청.body.parent,
+        userid : 요청.user._id,
+        content : 요청.body.content,
+        date : new Date(),
+    }
+    db.collection('message').insertOne(저장할거)
+        .then((결과)=>{
+            응답.send(결과);
+        })
+});
+
+
+app.get('/message/:parentid', isLogin, function(요청, 응답){
+
+    응답.writeHead(200, {
+        "Connection": "keep-alive",
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+    });
+
+    db.collection('message').find({ parent: 요청.params.parentid }).toArray()
+        .then((결과)=>{
+            console.log(결과);
+            응답.write('event: test\n');
+            응답.write(`data: ${JSON.stringify(결과)}\n\n`);
+        });
+    const 찾을문서 = [
+        { $match: { 'fullDocument.parent': 요청.params.parentid } }
+    ];
+
+    const changeStream = db.collection('message').watch(찾을문서);
+    changeStream.on('change', result => {
+        console.log(result.fullDocument);
+        var 추가된문서 = [result.fullDocument];
+        응답.write(`data: ${JSON.stringify(추가된문서)}\n\n`);
+    });
+});
+
+
+
+
 app.get('/home',isLogin ,function (req, res) {
     db.collection('counter').findOne(function (error, result) {
         res.render('home.ejs', {data: result,user:req.user})
