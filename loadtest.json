@@ -1,0 +1,36 @@
+{
+  "config": {
+    "target": "http://211.186.57.235:3000",
+    "phases": [
+      {
+        "duration": 30,
+        "arrivalRate": 5
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "flow": [
+        {
+          "get": {
+            "url": "/login"
+          }
+        },
+        {
+          "post": {
+            "url": "/login",
+            "json": {
+              "id": "test",
+              "pw": "test"
+            }
+          }
+        },
+        {
+          "get": {
+            "url": "/list"
+          }
+        }
+      ]
+    }
+  ]
+}

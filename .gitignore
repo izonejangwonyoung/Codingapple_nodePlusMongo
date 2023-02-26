@@ -1,0 +1,5 @@
+/node_modules/
+/.env
+/bootstrap_folder/
+/bootstrap-5.2.3/
+/assets/

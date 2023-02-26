@@ -1,0 +1,11 @@
+*{
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+#footprint{
+    text-align: center;
+    margin: 30px;
+}
+.list-group{
+    margin: 20px;
+}
