@@ -18,11 +18,11 @@ var cors = require('cors')
 const bodyParser = require("express");
 const {ObjectId} = require("mongodb");
 // const {request} = require("express");
-const request=require("request")
+const request = require("request")
 const https = require("https");
 const http = require("http");
 const key = process.env.TMDB_API_KEY
-const addr ="https://api.themoviedb.org/3/movie/now_playing?api_key="
+const addr = "https://api.themoviedb.org/3/movie/now_playing?api_key="
 const addr2 = "&language="
 const addr3 = "ko-KR"
 
@@ -108,15 +108,15 @@ app.post('/add', function (요청, 응답) {
 
     })
 })
-app.get('/movietest',function(req, res, next){
-    request(myaddr, function(error, response, body){
+app.get('/movietest', function (req, res, next) {
+    request(myaddr, function (error, response, body) {
         console.log(myaddr)
-        if(error){
+        if (error) {
             console.log(error)
         }
         var obj = JSON.parse(body)
         console.log(obj.results[0].title) // 콘솔창에 찍어보기
-        res.render('movietest.ejs',{obj:obj,user:req.user})
+        res.render('movietest.ejs', {obj: obj, user: req.user})
     })
 })
 // app.get('/moviesearch', isLogin,function(req, res, next){
