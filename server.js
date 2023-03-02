@@ -60,13 +60,13 @@ MongoClient.connect(process.env.mongo_address, function (에러, client) {
     if (에러) return console.log(에러)//에러처리
 
     db = client.db('todoapp');   ////tododapp이라는 데이터베이스에 연결
-
+    console.log(db)
 
     // db.collection('post').insertOne({이름: '심우혁', 나이: 23, _id: 77}, function (에러, 결과) {
     //     console.log('저장완료');
     // });
 
-    app.listen(3000, function () {
+    app.listen(8000, function () {
         console.log('listening on 16000')
     });
 });
