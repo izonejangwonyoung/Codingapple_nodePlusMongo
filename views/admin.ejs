@@ -83,9 +83,12 @@
                 <p> ID : <%= post[i].id%>  </p>
                 <p> PW : <%= post[i].pw%>  </p>
                 <p>가입 승인 여부: <%= post[i].isallowed%></p>
+                <p>현재 권한: <%= post[i].role%></p>
                 <button class="delete" data-id="<%= post[i].pw %>">삭제</button>
                 <button class="updateno" data-id="<%= post[i].pw %>">로그인 불가로 변경</button>
                 <button class="update" data-id="<%= post[i].pw %>" >로그인 가능으로 변경</button>
+                <button class="giveadmin" data-id="<%= post[i].pw %>" >어드민 권한 부여</button>
+                <button class="giveuser" data-id="<%= post[i].pw %>" >유저 권한 부여</button>
                 <%if (post[i].id===user.id){ %>
                     <p style="color: red;margin-top: 10px;font-weight: bold">정보: 접속중인 계정입니다</p>
                 <%}%>
@@ -140,6 +143,34 @@
         $.ajax({
             method: 'PUT',
             url: '/updatelogindenied',
+            data: {pw: e.target.dataset.id}
+        }).done((결과) => {
+            $('#mine').load(location.href+' #mine')
+            console.log('test')
+        }).always(function (xhr,status){
+            $("#text").html("요청이 완료되었습니다.!!")
+        })
+    });
+</script>
+<script>
+    $('.giveadmin').click(function (e) {
+        $.ajax({
+            method: 'PUT',
+            url: '/giveadminauth',
+            data: {pw: e.target.dataset.id}
+        }).done((결과) => {
+            $('#mine').load(location.href+' #mine')
+            console.log('test')
+        }).always(function (xhr,status){
+            $("#text").html("요청이 완료되었습니다.!!")
+        })
+    });
+</script>
+<script>
+    $('.giveuser').click(function (e) {
+        $.ajax({
+            method: 'PUT',
+            url: '/giveuserauth',
             data: {pw: e.target.dataset.id}
         }).done((결과) => {
             $('#mine').load(location.href+' #mine')

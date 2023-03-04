@@ -66,7 +66,7 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
     //     console.log('저장완료');
     // });
 
-    app.listen(8080, function () {
+    app.listen(3000, function () {
         console.log('listening on 8080')
     });
 });
@@ -161,6 +161,26 @@ app.put('/updatelogindenied', isAdmin, function (req, res) {
         console.log('로그인비허가완료되었습니다')
     })
     res.send('로그인비허가완료되었습니다.')
+})
+app.put('/giveadminauth', isAdmin, function (req, res) {
+    db.collection('login').updateOne({pw: req.body.pw}, {$set: {role: "admin"}}, function (err, result) {
+        if (err) {
+            return console.log(err)
+        }
+        console.log(result)
+        console.log('관리자 권한 부여 완료되었습니다')
+    })
+    res.send('관리자 권한 부여 완료되었습니다')
+})
+app.put('/giveuserauth', isAdmin, function (req, res) {
+    db.collection('login').updateOne({pw: req.body.pw}, {$set: {role: "user"}}, function (err, result) {
+        if (err) {
+            return console.log(err)
+        }
+        console.log(result)
+        console.log('유저 권한 부여 완료되었습니다')
+    })
+    res.send('유저 권한 부여 완료되었습니다')
 })
 app.get('/deleteallcomment', isAdmin, function (req, res) {
     db.collection('post').deleteMany({}, function (err, result) {
