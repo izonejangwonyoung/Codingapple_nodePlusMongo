@@ -414,7 +414,7 @@ app.get('/mypage', isLogin, function (req, res) {
 app.get('/fail', function (req, res) {
     const {headers: {referer}} = req
     console.log(referer);
-    if (referer !== 'http://211.186.57.235:8080/login') {
+    if (referer !== 'http://ericshim.me/login') {
         res.render('caution.ejs')
     } else {
         res.render('fail.ejs', {user: req.body})
