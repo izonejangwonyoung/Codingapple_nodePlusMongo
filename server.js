@@ -55,7 +55,7 @@ function getToday() {
     return year + month + day;
 }
 
-MongoClient.connect(process.env.mongo_address, function (에러, client) {
+MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 
     if (에러) return console.log(에러)//에러처리
 
@@ -66,8 +66,8 @@ MongoClient.connect(process.env.mongo_address, function (에러, client) {
     //     console.log('저장완료');
     // });
 
-    app.listen(8000, function () {
-        console.log('listening on 16000')
+    app.listen(8080, function () {
+        console.log('listening on 8080')
     });
 });
 
@@ -102,7 +102,7 @@ app.post('/add', function (요청, 응답) {
                 if (에러) {
                     return console.log(에러)
                 }
-                응답.send('전송완료');
+                응답.render('addcomplete.ejs',{user:req.user});
             })
         })
 
@@ -394,7 +394,7 @@ app.get('/mypage', isLogin, function (req, res) {
 app.get('/fail', function (req, res) {
     const {headers: {referer}} = req
     console.log(referer);
-    if (referer !== 'http://211.186.57.235:3000/login') {
+    if (referer !== 'http://211.186.57.235:8080/login') {
         res.render('caution.ejs')
     } else {
         res.render('fail.ejs', {user: req.body})
