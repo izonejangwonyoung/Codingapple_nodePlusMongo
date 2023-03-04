@@ -112,7 +112,8 @@
             data: {_id: e.target.dataset.id}
         }).done((결과) => {
             // $(e.target).parent('li').fadeOut();
-            $('#test').load(location.href+' #test')
+            // $('#test').load(location.href+' #test')
+            location.reload()
             console.log('test')
         }).always(function (xhr,status){
             $("#text").html("요청이 완료되었습니다.!!")
