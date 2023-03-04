@@ -86,7 +86,7 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 //         console.log('저장완료')
 //     })
 // })
-app.post('/add', function (요청, 응답) {
+app.post('/addcomplete', function (요청, 응답) {
     db.collection('counter').findOne({name: '게시물갯수'}, function (에러, 결과) {
         var 총게시물갯수 = 결과.totalPost
 
