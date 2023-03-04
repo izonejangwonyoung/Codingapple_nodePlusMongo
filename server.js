@@ -102,7 +102,7 @@ app.post('/addcomplete', function (요청, 응답) {
                 if (에러) {
                     return console.log(에러)
                 }
-                응답.render('addcomplete.ejs',{user:req.user});
+                응답.render('addcomplete.ejs',{user:요청.user});
             })
         })
 
