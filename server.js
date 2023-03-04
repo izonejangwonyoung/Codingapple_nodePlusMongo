@@ -425,7 +425,7 @@ app.get('/search', (req, res) => {
     var 검색조건 = [
         {
             $search: {
-                index: 'titleSearch',
+                index: 'default',
                 text: {
                     query: req.query.value,
                     path: '제목'  // 제목날짜 둘다 찾고 싶으면 ['제목', '날짜']
