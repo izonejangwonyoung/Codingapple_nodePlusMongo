@@ -71,8 +71,8 @@ function logAccess(req, res) {
     // const ip = req.headers['x-real-ip']  ||
      const ip = req.headers['x-real-ip']||
          // req.connection.remoteAddress
-         req.socket.remoteAddress
-    //     req.connection.socket.remoteAddress;
+         // req.socket.remoteAddress
+         req.connection.socket.remoteAddress;
     const time = new Date().toISOString();
     const method = req.method;
     const url = req.url;
