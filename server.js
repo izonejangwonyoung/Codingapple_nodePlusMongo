@@ -114,9 +114,12 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 
 
 app.get('/', function(reqV, res){
+    logAccess(req, res);
+
     res.send('빈 페이지입니다. <a href="/login">로그인 페이지</a>로 가기');
 });
 app.post('/addcomplete', function (요청, 응답) {
+    logAccess(요청, 응답);
     db.collection('counter').findOne({name: '게시물갯수'}, function (에러, 결과) {
         var 총게시물갯수 = 결과.totalPost
 
@@ -139,6 +142,8 @@ app.post('/addcomplete', function (요청, 응답) {
     })
 })
 app.get('/movietest', function (req, res, next) {
+    logAccess(req, res);
+
     request(myaddr, function (error, response, body) {
         console.log(myaddr)
         if (error) {
@@ -160,12 +165,16 @@ app.get('/movietest', function (req, res, next) {
 //     })
 // })
 app.get('/admin', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('login').find().toArray(function (err, result) {
         console.log(result)
         res.render('admin.ejs', {user: req.user, post: result})
     })
 })
 app.delete('/deleteaccount', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('login').deleteOne({pw: req.body.pw}, function (err, result) {
         console.log(result)
         console.log('delete account complete')
@@ -173,6 +182,8 @@ app.delete('/deleteaccount', isAdmin, function (req, res) {
     res.send('account delete complete')
 })
 app.put('/updateloginallowed', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('login').updateOne({pw: req.body.pw}, {$set: {isallowed: "Y"}}, function (err, result) {
         if (err) {
             return console.log(err)
@@ -183,6 +194,8 @@ app.put('/updateloginallowed', isAdmin, function (req, res) {
     res.send('로그인허가완료되었습니다.')
 })
 app.put('/updatelogindenied', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('login').updateOne({pw: req.body.pw}, {$set: {isallowed: "N"}}, function (err, result) {
         if (err) {
             return console.log(err)
@@ -193,6 +206,8 @@ app.put('/updatelogindenied', isAdmin, function (req, res) {
     res.send('로그인비허가완료되었습니다.')
 })
 app.put('/giveadminauth', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('login').updateOne({pw: req.body.pw}, {$set: {role: "admin"}}, function (err, result) {
         if (err) {
             return console.log(err)
@@ -203,6 +218,8 @@ app.put('/giveadminauth', isAdmin, function (req, res) {
     res.send('관리자 권한 부여 완료되었습니다')
 })
 app.put('/giveuserauth', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('login').updateOne({pw: req.body.pw}, {$set: {role: "user"}}, function (err, result) {
         if (err) {
             return console.log(err)
@@ -213,6 +230,8 @@ app.put('/giveuserauth', isAdmin, function (req, res) {
     res.send('유저 권한 부여 완료되었습니다')
 })
 app.get('/deleteallcomment', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('post').deleteMany({}, function (err, result) {
         db.collection('counter').updateOne({name: '게시물갯수'}, {$set: {totalPost: 0}}, function (err, result) {
 
@@ -225,6 +244,8 @@ app.get('/deleteallcomment', isAdmin, function (req, res) {
 })
 ////20230223 관리자 페이지 카운터 0으로 초기화 버튼 기능 구현
 app.get('/resetcounter', isAdmin, function (req, res) {
+    logAccess(req, res);
+
     db.collection('counter').updateOne({name: '게시물갯수'}, {$set: {totalPost: 0}}, function (err, result) {
 
         if (err) {
@@ -234,6 +255,8 @@ app.get('/resetcounter', isAdmin, function (req, res) {
     })
 })
 app.get('/write', isLogin, function (req, res) {
+    logAccess(req, res);
+
     res.render('write.ejs', {user: req.user})
 })
 
@@ -252,7 +275,9 @@ app.get('/list', isLogin, function (요청, 응답) {
 
 
 app.delete('/delete', function (요청, 응답) {
-        요청.body._id = parseInt(요청.body._id);
+    logAccess(요청, 응답);
+
+    요청.body._id = parseInt(요청.body._id);
 
         db.collection('post').findOne({_id: 요청.body._id}, function (err, result) {
 
@@ -335,6 +360,7 @@ app.delete('/delete', function (요청, 응답) {
 )
 
 app.get('/detail/:id', function (요청, 응답) {
+    logAccess(요청, 응답);
     db.collection('post').findOne({
         function(에러, 결과) {
             응답.render('detail.ejs', {posts: 결과})
@@ -343,12 +369,14 @@ app.get('/detail/:id', function (요청, 응답) {
 })
 
 app.get('/edit/:id', function (req, res) {
+    logAccess(req, res);
     db.collection('post').findOne({_id: parseInt(req.params.id)}, function (에러, 결과) {
         res.render('edit.ejs', {edit: 결과})
     })
 })
 
 app.put('/edit', isLogin, function (요청, 응답) {
+    logAccess(요청, 응답);
     db.collection('post').updateOne({_id: parseInt(요청.body.id)}, {
         $set: {
             제목: 요청.body.title,
@@ -363,6 +391,7 @@ app.put('/edit', isLogin, function (요청, 응답) {
 });
 
 app.post('/chat', function (req, res) {
+    logAccess(req, res);
     var 저장할거 = {
         title: req.user.id + '가 생성한 채팅방',
         member: [ObjectId(req.body.대상id), req.user._id],
@@ -374,6 +403,7 @@ app.post('/chat', function (req, res) {
     });
 });
 app.get('/chat', isLogin, function (req, res) {
+    logAccess(req, res);
     db.collection('chatroom').find({member: req.user._id}).toArray().then((결과) => {
         console.log(결과);
         ///결과가 어레이 형식으로 들어옴
@@ -383,6 +413,7 @@ app.get('/chat', isLogin, function (req, res) {
 })
 
 app.post('/message', isLogin, function (요청, 응답) {
+    logAccess(요청, 응답);
     var 저장할거 = {
         parent: 요청.body.parent,
         userid: 요청.user._id,
@@ -397,7 +428,7 @@ app.post('/message', isLogin, function (요청, 응답) {
 
 
 app.get('/message/:parentid', isLogin, function (요청, 응답) {
-
+    logAccess(요청, 응답);
     응답.writeHead(200, {
         "Connection": "keep-alive",
         "Content-Type": "text/event-stream",
@@ -424,24 +455,35 @@ app.get('/message/:parentid', isLogin, function (요청, 응답) {
 
 
 app.get('/home', isLogin, function (req, res) {
+    logAccess(req, res);
     db.collection('counter').findOne(function (error, result) {
         res.render('home.ejs', {data: result, user: req.user})
     })
 })
 app.get('/welcome', function (req, res) {
+    logAccess(req, res);
+
     res.render('welcome.ejs')
 })
 app.get('/login', function (req, res) {
+    logAccess(req, res);
+
     res.render('login.ejs', {user: req.user})
 })
 app.post('/login', passport.authenticate('local', {failureRedirect: '/fail'}), function (req, res) {
+    logAccess(req, res);
+
     res.redirect('/home')
 });
 
 app.get('/mypage', isLogin, function (req, res) {
+    logAccess(req, res);
+
     res.render('mypage.ejs', {user: req.user})
 })
 app.get('/fail', function (req, res) {
+    logAccess(req, res);
+
     const {headers: {referer}} = req
     console.log(referer);
     if (referer !== 'http://footprint.ericshim.me/login') {
@@ -451,6 +493,8 @@ app.get('/fail', function (req, res) {
     }
 })
 app.get('/search', (req, res) => {
+    logAccess(req, res);
+
     console.log(req.query.value)
     var 검색조건 = [
         {
@@ -496,6 +540,8 @@ function isAdmin(req, res, next) {
 }
 
 app.get("/logout", function (req, res, next) {
+    logAccess(req, res);
+
     req.logout(function (err) {
         if (err) {
             return next(err);
@@ -512,9 +558,13 @@ app.get("/logout", function (req, res, next) {
 //     res.redirect('/home');
 // });
 app.get('/join', function (req, res) {
+    logAccess(req, res);
+
     res.render('join.ejs', {user: req.user})
 })
 app.post('/join', function (req, res) {
+    logAccess(req, res);
+
     // const hashId = crypto.createHash('sha512').update(req.body.id + salt).digest('hex');
     // const hashPw = crypto.createHash('sha512').update(req.body.pw + salt).digest('hex');
     // let cryptedId=createHashedPassword(req.body.id)
