@@ -69,8 +69,8 @@ function getToday() {
 function logAccess(req, res) {
     // const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     // const ip = req.headers['x-real-ip']  ||
-     const ip = req.headers['x-real-ip']
-    //     req.connection.remoteAddress ||
+     const ip = req.headers['x-real-ip']||
+         req.connection.remoteAddress
     //     req.socket.remoteAddress ||
     //     req.connection.socket.remoteAddress;
     const time = new Date().toISOString();
