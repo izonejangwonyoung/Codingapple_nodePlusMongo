@@ -36,6 +36,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 require('dotenv').config();
 app.set('view engine', 'ejs')
+app.set('trust proxy', true)
 app.use(session({secret: 'anything'}));
 app.use(passport.initialize());
 app.use(passport.session());
