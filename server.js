@@ -8,6 +8,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 const fs=require('fs')
+app.set('trust proxy', true)
 require('dotenv').config()
 
 const createHashedPassword = (password) => {
@@ -67,7 +68,8 @@ function getToday() {
 }
 //20230306 로그 기록 함수
 function logAccess(req, res) {
-     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+     // const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    const ip=req.ip
     // // const ip = req.headers['x-real-ip']  ||
     //  const ip = req.headers['x-real-ip']||
     //      // req.connection.remoteAddress
