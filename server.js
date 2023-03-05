@@ -7,6 +7,7 @@ const methodOverride = require('method-override')
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
+const fs=require('fs')
 require('dotenv').config()
 
 const createHashedPassword = (password) => {
@@ -62,6 +63,20 @@ function getToday() {
     var day = ("0" + date.getDate()).slice(-2) - 1;
 
     return year + month + day;
+}
+//20230306 로그 기록 함수
+function logAccess(req, res) {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const time = new Date().toISOString();
+    const method = req.method;
+    const url = req.url;
+    const statusCode = res.statusCode;
+
+    // 로그 메시지 작성
+    const logMessage = `${ip} - [${time}] "${method} ${url}" ${statusCode}\n`;
+
+    // 로그 파일에 쓰기
+    logStream.write(logMessage);
 }
 
 MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
@@ -223,7 +238,7 @@ app.get('/write', isLogin, function (req, res) {
 
 
 app.get('/list', isLogin, function (요청, 응답) {
-
+    logAccess(요청, 응답);
     db.collection('counter').findOne({name: '게시물갯수'}, function (에러, 결과) {
 
         db.collection('post').find().toArray(function (err, result) {
