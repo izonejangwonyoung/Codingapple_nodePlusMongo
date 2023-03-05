@@ -45,7 +45,16 @@ module.exports = app;
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride('_method'))
+app.use((req, res, next) => {
+    const forbiddenFileExtensions = ['.js', '.css', '.html','.env'];
+    const requestedUrl = req.url;
 
+    if (forbiddenFileExtensions.some(ext => requestedUrl.endsWith(ext))) {
+        return res.status(403).send('Forbidden');
+    }
+
+    return next();
+});
 function getToday() {
     var date = new Date();
     var year = date.getFullYear();
@@ -88,7 +97,7 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 // })
 
 
-app.get('/', function(req, res){
+app.get('/', function(reqV, res){
     res.send('빈 페이지입니다. <a href="/login">로그인 페이지</a>로 가기');
 });
 app.post('/addcomplete', function (요청, 응답) {
