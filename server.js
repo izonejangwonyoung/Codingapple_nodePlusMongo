@@ -68,9 +68,9 @@ function getToday() {
 }
 //20230306 로그 기록 함수
 function logAccess(req, res) {
-     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-    // // const ip = req.headers['x-real-ip']  ||
-    //  const ip = req.headers['x-real-ip']||
+     const ip = req.headers['x-forwarded-for'] ||
+     req.headers['x-real-ip']  ||
+      req.headers['cf-connecting-ip'];
     //      // req.connection.remoteAddress
     //      // req.socket.remoteAddress
     //      req.connection.socket.remoteAddress;
