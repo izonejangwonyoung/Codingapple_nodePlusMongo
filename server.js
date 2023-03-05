@@ -26,6 +26,7 @@ const key = process.env.TMDB_API_KEY
 const addr = "https://api.themoviedb.org/3/movie/now_playing?api_key="
 const addr2 = "&language="
 const addr3 = "ko-KR"
+const logStream = fs.createWriteStream('./access.log', { flags: 'a' });
 
 var myaddr = addr + key + addr2 + addr3
 let db;
