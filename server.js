@@ -113,7 +113,7 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 // })
 
 
-app.get('/', function(reqV, res){
+app.get('/', function(req, res){
     logAccess(req, res);
 
     res.send('빈 페이지입니다. <a href="/login">로그인 페이지</a>로 가기');
