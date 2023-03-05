@@ -86,6 +86,11 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 //         console.log('저장완료')
 //     })
 // })
+
+
+app.get('/', function(req, res){
+    res.send('빈 페이지입니다. <a href="footprint.ericshim.me/login">로그인 페이지</a>로 가기');
+});
 app.post('/addcomplete', function (요청, 응답) {
     db.collection('counter').findOne({name: '게시물갯수'}, function (에러, 결과) {
         var 총게시물갯수 = 결과.totalPost
