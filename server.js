@@ -66,7 +66,7 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
     //     console.log('저장완료');
     // });
 
-    app.listen(80, function () {
+    app.listen(8080, function () {
         console.log('listening on 8080')
     });
 });
