@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="css/addcomplete.css">
     <title>Eric's 방명록</title>
 
 </head>
 <body>
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="/index.html">Navbar</a>
+    <a class="navbar-brand" href="/home">Eric's 방명록</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -27,7 +28,12 @@
                     <a class="nav-link" href="/write">Write</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/mypage">MyPage</a>
+                    <a class="nav-link" href="/list">List</a>
+                </li>
+            <% } %>
+            <% if (user.role==="admin"){ %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin">Admin</a>
                 </li>
             <% } %>
             <li class="nav-item">
@@ -38,9 +44,18 @@
             <!--                <a class="nav-link disabled" href="#">Disabled</a>-->
             <!--            </li>-->
         </ul>
+        <form class="form-inline my-2 my-lg-0" style="margin-right: 10px" ;>
+            <%= user.nickname%>님 환영합니다
+
+        </form>
+        <button type="button" class="btn btn-primary" style="margin-right: 10px"
+                onclick={window.location.href="/mypage"}>My Page
+        </button>
         <% if (user) { %>
             <button type="button" class="btn btn-primary" style="margin-right: 10px"
+
                     onclick={window.location.href="/logout"}>LOGOUT
+
             </button>
         <% }else { %>
             <button type="button" class="btn btn-primary" style="margin-right: 10px"
@@ -51,17 +66,16 @@
     </div>
 </nav>
 
-
 <h4 class="container mt-4"><strong>글 작성페이지</strong></h4>
 
 <div class="container mt-3">
     <form action="/add" method="post">
         <div class="form-group">
-            <label>오늘 들었던 노래</label>
+            <label>남기고 싶은 말</label>
             <input type="text" name="title" class="form-control">
         </div>
         <div class="form-group">
-            <label>오늘의 한줄평</label>
+            <label>오늘의 최애 플리</label>
             <input type="text" class="form-control" name="date">
         </div>
         <button type="submit" class="btn btn-outline-secondary">Submit</button>
