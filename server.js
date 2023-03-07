@@ -323,7 +323,7 @@ app.delete('/delete', function (요청, 응답) {
                 //         console.log("삭제버튼누른사람:" + 요청.user._id)
                 //         console.log("삭제id:" + 요청.body._id)
 
-                if (myobject1string == myobject2string) {
+                if (myobject1string == myobject2string && 요청.user.role !=='admin') {
                     db.collection('post').deleteOne({_id: 요청.body._id}, function (에러, 결과) {
                         // console.log("글 작성한 사람: "+요청.body.작성자)
                         console.log("글 작성한 사람:" + result.작성자)
