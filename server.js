@@ -374,7 +374,7 @@ app.get('/detail/:id', function (요청, 응답) {
     })
 })
 
-app.get('/edit/:id', function (req, res) {
+app.get('/edit/:id', isAdmin,function (req, res) {
     logAccess(req, res);
     db.collection('post').findOne({_id: parseInt(req.params.id)}, function (에러, 결과) {
         res.render('edit.ejs', {edit: 결과})
