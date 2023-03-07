@@ -67,8 +67,10 @@
 <h4 class="container mt-4"><strong>MY 페이지</strong></h4>
 <p>MYPAGE~~!~!</p>
 <p>로그인되어있는 계정의 아이디: <%= user.id%></p>
-<p>로그인되어있는 계정의 비밀번호:</p>  <button id="onDisplay">show</button>  <p id="noneDiv" style="display: none"> <%= user.pw%> </p>
-
+<div>
+<p>로그인되어있는 계정의 비밀번호(암호화):</p>  <button id="onDisplay">show</button>  <p id="noneDiv" style="display: none"> <%= user.pw%> </p>
+</div>
+<p>로그인되어있는 계정의 닉네임:  <%= user.nickname%> </p>
 
 </body>
 </html>
