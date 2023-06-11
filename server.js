@@ -1,4 +1,13 @@
 const express = require('express')
+const request = require("request")
+const https = require("https");
+const http = require("http");
+const fs=require('fs')
+var privateKey = fs.readFileSync("./cert/privkey.pem")
+var certificate = fs.readFileSync("./cert/cert.pem")
+var ca = fs.readFileSync("./cert/chain.pem")
+const credentials = { key: privateKey, cert: certificate, ca: ca }
+
 const app = express()
 app.use(express.static("views"));
 const MongoClient = require('mongodb').MongoClient
@@ -7,7 +16,6 @@ const methodOverride = require('method-override')
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
-const fs=require('fs')
 app.set('trust proxy', true)
 require('dotenv').config()
 
@@ -20,9 +28,10 @@ var cors = require('cors')
 const bodyParser = require("express");
 const {ObjectId} = require("mongodb");
 // const {request} = require("express");
-const request = require("request")
-const https = require("https");
-const http = require("http");
+
+
+// http.createServer(app).listen(80)
+https.createServer(credentials, app).listen(443)
 const key = process.env.TMDB_API_KEY
 const addr = "https://api.themoviedb.org/3/movie/now_playing?api_key="
 const addr2 = "&language="
@@ -68,9 +77,9 @@ function getToday() {
 }
 //20230306 로그 기록 함수
 function logAccess(req, res) {
-     const ip = req.headers['x-forwarded-for'] ||
-     req.headers['x-real-ip']  ||
-      req.headers['cf-connecting-ip'];
+    const ip = req.headers['x-forwarded-for'] ||
+        req.headers['x-real-ip']  ||
+        req.headers['cf-connecting-ip'];
     //      // req.connection.remoteAddress
     //      // req.socket.remoteAddress
     //      req.connection.socket.remoteAddress;
@@ -97,9 +106,9 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
     //     console.log('저장완료');
     // });
 
-    app.listen(80, function () {
-        console.log('listening on 8080')
-    });
+    // app.listen(3003, function () {
+    //     console.log('listening on 8080')
+    // });
 });
 
 // app.post('/add', function (요청, 응답) {
@@ -121,8 +130,8 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 
 app.get('/', function(req, res){
     logAccess(req, res);
-
-    res.send('빈 페이지입니다. <a href="/login">로그인 페이지</a>로 가기');
+    res.redirect('/login');
+    // res.send('빈 페이지입니다. <a href="/login">로그인 페이지</a>로 가기');
 });
 app.post('/addcomplete', function (요청, 응답) {
     logAccess(요청, 응답);
@@ -278,92 +287,160 @@ app.get('/list', isLogin, function (요청, 응답) {
 
     })
 })
+//
+//
+// app.delete('/delete', function (요청, 응답) {
+//         logAccess(요청, 응답);
+//
+//         요청.body._id = parseInt(요청.body._id);
+//
+//         db.collection('post').findOne({_id: 요청.body._id}, function (err, result) {
+//
+//                 //     console.log(result.작성자,'result.작성자')
+//                 //     console.log(요청.user._id,'<=요청.user._id')
+//                 //     console.log(typeof result.작성자)
+//                 // console.log(typeof 요청.user._id)
+//                 const myobjectid1 = ObjectId(result.작성자)
+//                 const myobjectid2 = ObjectId(요청.user._id)
+//                 const myobject1string = myobjectid1.toString()
+//                 const myobject2string = myobjectid2.toString()
+//                 if (요청.user.role === 'admin') {
+//                     db.collection('post').deleteOne({_id: 요청.body._id}, function (에러, 결과) {
+//                         // console.log("글 작성한 사람: "+요청.body.작성자)
+//                         console.log("글 작성한 사람:" + result.작성자)
+//                         console.log("삭제버튼누른사람:" + 요청.user._id)
+//                         console.log("삭제id:" + 요청.body._id)
+//                         console.log("관리자 권한")
+//                         console.log("삭제완료")
+//                         응답.send('complete');
+//
+//                     })
+//                     db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
+//                         console.log("카운트 초기화 완료")
+//                     }, function (에러, 응답) {
+//                         if (에러) {
+//                             return console.log(에러)
+//                         }
+//                     })
+//                     console.log("관리자 권한")
+//                     console.log("삭제완료")
+//
+//
+//                 }
+//                 // db.collection('post').deleteOne({_id: 요청.body._id, 작성자: 요청.user._id}, function (에러, 결과) {
+//                 //         // console.log("글 작성한 사람: "+요청.body.작성자)
+//                 //         console.log("글 작성한 사람: " + result.작성자)
+//                 //         console.log("삭제버튼누른사람:" + 요청.user._id)
+//                 //         console.log("삭제id:" + 요청.body._id)
+//
+//                 if (myobject1string == myobject2string && 요청.user.role !=='admin') {
+//                     db.collection('post').deleteOne({_id: 요청.body._id}, function (에러, 결과) {
+//                         // console.log("글 작성한 사람: "+요청.body.작성자)
+//                         console.log("글 작성한 사람:" + result.작성자)
+//                         console.log("삭제버튼누른사람:" + 요청.user._id)
+//                         console.log("삭제id:" + 요청.body._id)
+//                         요청.send('complete')
+//                     })
+//                     db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
+//                         console.log("카운트 초기화 완료")
+//                         요청.send('complete')
+//                     }, function (에러, 응답) {
+//                         if (에러) {
+//                             return console.log(에러)
+//                         }
+//                     })
+//                     console.log("글 주인")
+//                     console.log("삭제완료")
+//                 } else {
+//                     // console.log(typeof(result.작성자))
+//                     console.log('글주인X')
+//                     console.log('삭제불가')
+//                     console.log("글 작성한 사람: " + 요청.body)
+//                     console.log(JSON.stringify(요청.body));
+//                     console.log("---------")
+//                     console.log(JSON.stringify(요청.user));
+//                     console.log("---------")
+//                     console.log(result._id)
+//                     console.log(result.작성자)
+//
+//                     console.log("삭제버튼누른사람:" + 요청.user._id)
+//                     console.log("삭제id:" + 요청.body._id)
+//                 }
+//             }
+//         );
+//         // db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
+//         //     console.log("카운트 초기화 완료")
+//         // }, function (에러, 응답) {
+//         //     if (에러) {
+//         //         return console.log(에러)
+//         //     })
+//     }
+// )
 
-
+//실행 시 서버로부터 응답 오지 않는 현상 수정
 app.delete('/delete', function (요청, 응답) {
     logAccess(요청, 응답);
 
     요청.body._id = parseInt(요청.body._id);
 
-        db.collection('post').findOne({_id: 요청.body._id}, function (err, result) {
+    db.collection('post').findOne({_id: 요청.body._id}, function (err, result) {
+        const myobjectid1 = ObjectId(result.작성자);
+        const myobjectid2 = ObjectId(요청.user._id);
+        const myobject1string = myobjectid1.toString();
+        const myobject2string = myobjectid2.toString();
 
-                //     console.log(result.작성자,'result.작성자')
-                //     console.log(요청.user._id,'<=요청.user._id')
-                //     console.log(typeof result.작성자)
-                // console.log(typeof 요청.user._id)
-                const myobjectid1 = ObjectId(result.작성자)
-                const myobjectid2 = ObjectId(요청.user._id)
-                const myobject1string = myobjectid1.toString()
-                const myobject2string = myobjectid2.toString()
-                if (요청.user.role === 'admin') {
-                    db.collection('post').deleteOne({_id: 요청.body._id}, function (에러, 결과) {
-                        // console.log("글 작성한 사람: "+요청.body.작성자)
-                        console.log("글 작성한 사람:" + result.작성자)
-                        console.log("삭제버튼누른사람:" + 요청.user._id)
-                        console.log("삭제id:" + 요청.body._id)
-                        console.log("관리자 권한")
-                        console.log("삭제완료")
+        if (요청.user.role === 'admin') {
+            db.collection('post').deleteOne({_id: 요청.body._id}, function (에러, 결과) {
+                console.log("글 작성한 사람:" + result.작성자);
+                console.log("삭제버튼누른사람:" + 요청.user._id);
+                console.log("삭제id:" + 요청.body._id);
+                응답.send('complete');
+            });
 
-                    })
-                    db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
-                        console.log("카운트 초기화 완료")
-                    }, function (에러, 응답) {
-                        if (에러) {
-                            return console.log(에러)
-                        }
-                    })
-                    console.log("관리자 권한")
-                    console.log("삭제완료")
-
-
+            db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (에러, 결과) {
+                console.log("카운트 초기화 완료");
+            }, function (에러, 응답) {
+                if (에러) {
+                    return console.log(에러);
                 }
-                // db.collection('post').deleteOne({_id: 요청.body._id, 작성자: 요청.user._id}, function (에러, 결과) {
-                //         // console.log("글 작성한 사람: "+요청.body.작성자)
-                //         console.log("글 작성한 사람: " + result.작성자)
-                //         console.log("삭제버튼누른사람:" + 요청.user._id)
-                //         console.log("삭제id:" + 요청.body._id)
+            });
 
-                if (myobject1string == myobject2string && 요청.user.role !=='admin') {
-                    db.collection('post').deleteOne({_id: 요청.body._id}, function (에러, 결과) {
-                        // console.log("글 작성한 사람: "+요청.body.작성자)
-                        console.log("글 작성한 사람:" + result.작성자)
-                        console.log("삭제버튼누른사람:" + 요청.user._id)
-                        console.log("삭제id:" + 요청.body._id)
-                    })
-                    db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
-                        console.log("카운트 초기화 완료")
-                    }, function (에러, 응답) {
-                        if (에러) {
-                            return console.log(에러)
-                        }
-                    })
-                    console.log("글 주인")
-                    console.log("삭제완료")
-                } else {
-                    // console.log(typeof(result.작성자))
-                    console.log('글주인X')
-                    console.log('삭제불가')
-                    console.log("글 작성한 사람: " + 요청.body)
-                    console.log(JSON.stringify(요청.body));
-                    console.log("---------")
-                    console.log(JSON.stringify(요청.user));
-                    console.log("---------")
-                    console.log(result._id)
-                    console.log(result.작성자)
+            console.log("관리자 권한");
+            console.log("삭제완료");
+        } else if (myobject1string == myobject2string && 요청.user.role !== 'admin') {
+            db.collection('post').deleteOne({_id: 요청.body._id}, function (에러, 결과) {
+                console.log("글 작성한 사람:" + result.작성자);
+                console.log("삭제버튼누른사람:" + 요청.user._id);
+                console.log("삭제id:" + 요청.body._id);
+                응답.send('complete');
+            });
 
-                    console.log("삭제버튼누른사람:" + 요청.user._id)
-                    console.log("삭제id:" + 요청.body._id)
+            db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (에러, 결과) {
+                console.log("카운트 초기화 완료");
+                응답.send('complete');
+            }, function (에러, 응답) {
+                if (에러) {
+                    return console.log(에러);
                 }
-            }
-        );
-        // db.collection('counter').updateOne({name: '게시물갯수'}, {$inc: {totalPost: -1}}, function (요청, 응답) {
-        //     console.log("카운트 초기화 완료")
-        // }, function (에러, 응답) {
-        //     if (에러) {
-        //         return console.log(에러)
-        //     })
-    }
-)
+            });
+
+            console.log("글 주인");
+            console.log("삭제완료");
+        } else {
+            console.log('글주인X');
+            console.log('삭제불가');
+            console.log("글 작성한 사람: " + 요청.body);
+            console.log(JSON.stringify(요청.body));
+            console.log("---------");
+            console.log(JSON.stringify(요청.user));
+            console.log("---------");
+            console.log(result._id);
+            console.log(result.작성자);
+            console.log("삭제버튼누른사람:" + 요청.user._id);
+            console.log("삭제id:" + 요청.body._id);
+        }
+    });
+});
 
 app.get('/detail/:id', function (요청, 응답) {
     logAccess(요청, 응답);
@@ -492,7 +569,7 @@ app.get('/fail', function (req, res) {
 
     const {headers: {referer}} = req
     console.log(referer);
-    if (referer !== 'http://footprint.ericshim.me/login') {
+    if (referer !== 'https://footprint.ericshim.me/login') {
         res.render('caution.ejs')
     } else {
         res.render('fail.ejs', {user: req.body})
