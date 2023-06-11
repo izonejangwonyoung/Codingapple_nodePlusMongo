@@ -2,11 +2,11 @@ const express = require('express')
 const request = require("request")
 const https = require("https");
 const http = require("http");
-const fs=require('fs')
+const fs = require('fs')
 var privateKey = fs.readFileSync("./cert/privkey.pem")
 var certificate = fs.readFileSync("./cert/cert.pem")
 var ca = fs.readFileSync("./cert/chain.pem")
-const credentials = { key: privateKey, cert: certificate, ca: ca }
+const credentials = {key: privateKey, cert: certificate, ca: ca}
 
 const app = express()
 app.use(express.static("views"));
@@ -36,7 +36,7 @@ const key = process.env.TMDB_API_KEY
 const addr = "https://api.themoviedb.org/3/movie/now_playing?api_key="
 const addr2 = "&language="
 const addr3 = "ko-KR"
-const logStream = fs.createWriteStream('./access.log', { flags: 'a' });
+const logStream = fs.createWriteStream('./access.log', {flags: 'a'});
 
 var myaddr = addr + key + addr2 + addr3
 let db;
@@ -58,7 +58,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride('_method'))
 app.use((req, res, next) => {
-    const forbiddenFileExtensions = ['.js', '.css', '.html','.env'];
+    const forbiddenFileExtensions = ['.js', '.css', '.html', '.env'];
     const requestedUrl = req.url;
 
     if (forbiddenFileExtensions.some(ext => requestedUrl.endsWith(ext))) {
@@ -67,6 +67,7 @@ app.use((req, res, next) => {
 
     return next();
 });
+
 function getToday() {
     var date = new Date();
     var year = date.getFullYear();
@@ -75,10 +76,11 @@ function getToday() {
 
     return year + month + day;
 }
+
 //20230306 로그 기록 함수
 function logAccess(req, res) {
     const ip = req.headers['x-forwarded-for'] ||
-        req.headers['x-real-ip']  ||
+        req.headers['x-real-ip'] ||
         req.headers['cf-connecting-ip'];
     //      // req.connection.remoteAddress
     //      // req.socket.remoteAddress
@@ -128,7 +130,7 @@ MongoClient.connect(process.env.MONGO_ADDRESS, function (에러, client) {
 // })
 
 
-app.get('/', function(req, res){
+app.get('/', function (req, res) {
     logAccess(req, res);
     res.redirect('/login');
     // res.send('빈 페이지입니다. <a href="/login">로그인 페이지</a>로 가기');
@@ -150,7 +152,7 @@ app.post('/addcomplete', function (요청, 응답) {
                 if (에러) {
                     return console.log(에러)
                 }
-                응답.render('addcomplete.ejs',{user:요청.user});
+                응답.render('addcomplete.ejs', {user: 요청.user});
             })
         })
 
@@ -451,10 +453,10 @@ app.get('/detail/:id', function (요청, 응답) {
     })
 })
 
-app.get('/edit/:id', isAdmin,function (req, res) {
+app.get('/edit/:id', isAdmin, function (req, res) {
     logAccess(req, res);
     db.collection('post').findOne({_id: parseInt(req.params.id)}, function (에러, 결과) {
-        res.render('edit.ejs', {edit: 결과,user:req.user})
+        res.render('edit.ejs', {edit: 결과, user: req.user})
     })
 })
 
@@ -647,26 +649,162 @@ app.get('/join', function (req, res) {
 })
 app.post('/join', function (req, res) {
     logAccess(req, res);
+    db.collection('login').findOne({id: req.body.id}, function (err, result) {
+        if (err) {
+            console.log('DB에서 id 중복 검사 중 오류 발생');
+            res.status(500).send('An error occurred while checking ID duplication.');
+            return;
+        }
 
-    // const hashId = crypto.createHash('sha512').update(req.body.id + salt).digest('hex');
-    // const hashPw = crypto.createHash('sha512').update(req.body.pw + salt).digest('hex');
-    // let cryptedId=createHashedPassword(req.body.id)
-    hasher({
-        password: req.body.pw
-    }, (err, pass, salt, hash) => {
-        db.collection('login').insertOne({
-            id: req.body.id,
-            pw: hash,
-            salt: salt,
-            nickname: req.body.nickname,
-            role: "user",
-            isallowed: "N"
-        })
-    })
-    // res.send('complete')
-    res.render('joincomplete.ejs', {user: req.user})
+        console.log(result, '중복되는 회원이 있는지 검사해서 리턴되는 결과값');
 
-})
+        if (result) {
+            console.log('중복되는 아이디가 있어서 회원 가입 진행 불가');
+            res.status(400).send('The ID is already taken.');
+        } else {
+            console.log('중복되는 아이디가 검색되지 않아서 닉네임 중복 검사로 넘어옴');
+            console.log('닉네임 중복되나 검사');
+
+            db.collection('login').findOne({nickname: req.body.nickname}, function (err, result) {
+                if (err) {
+                    console.log('DB에서 닉네임 중복 검사 중 오류 발생');
+                    res.status(500).send('An error occurred while checking nickname duplication.');
+                    return;
+                }
+
+                console.log(result, '중복되는 닉네임이 있는지 검사해서 리턴되는 결과값');
+
+                if (result) {
+                    console.log('중복되는 닉네임이 있어서 회원 가입 진행 불가');
+                    res.status(400).send('The NICKNAME is already taken.');
+                } else {
+                    console.log('모든 중복 검사를 통과하고 회원가입 시작');
+
+                    hasher({password: req.body.pw}, (err, pass, salt, hash) => {
+                        if (err) {
+                            console.log('비밀번호 해싱 중 오류 발생');
+                            res.status(500).send('An error occurred while hashing the password.');
+                            return;
+                        }
+
+                        db.collection('login').insertOne({
+                            id: req.body.id,
+                            pw: hash,
+                            salt: salt,
+                            nickname: req.body.nickname,
+                            role: "user",
+                            isallowed: "N"
+                        }, function (err, result) {
+                            if (err) {
+                                console.log('DB에 데이터 삽입 중 오류 발생');
+                                res.status(500).send('An error occurred while saving the user.');
+                                return;
+                            }
+
+                            res.render('joincomplete.ejs', {user: req.user});
+                        });
+                    });
+                }
+            });
+        }
+    });
+});
+
+
+// app.post('/join', function (req, res) {
+//     logAccess(req, res);
+//     db.collection('login').findOne({id: req.body.id}, function (err, result) {
+//         console.log(result, '중복되는 회원이 있는지 검사해서 리턴되는 결과값')
+//         if (result) {
+//             if (result.id === req.body.id) {
+//                 console.log('중복되는 아이디가 있어서 회원 가입 진행 불가')
+//                 res.status(400).send('The ID is already taken.');
+//             }
+//         } else {
+//             console.log('중복되는 아이디가 검색되지 않아서 닉네임 중복 검사로 넘어옴')
+//             console.log('닉네임 중복되나 검사')
+//             db.collection('login').findOne({nickname: req.body.nickname}, function (err, result) {
+//                 console.log(result, '중복되는 닉네임이 있는지 검사해서 리턴되는 결과값')
+//                 if (result) {
+//                     if (result.nickname === req.body.nickname) {
+//                         console.log('중복되는 닉네임이 있어서 회원 가입 진행 불가')
+//                         res.status(400).send('The NICKNAME is already taken.');
+//                     } else {
+//                         console.log('모든 중복 검사를 통과하고 회원가입 시작')
+//                         hasher({password: req.body.pw}, (err, pass, salt, hash) => {
+//                             db.collection('login').insertOne({
+//                                 id: req.body.id,
+//                                 pw: hash,
+//                                 salt: salt,
+//                                 nickname: req.body.nickname,
+//                                 role: "user",
+//                                 isallowed: "N"
+//                             }, function (err, result) {
+//                                 if (err) {
+//                                     console.log('DB에 데이터 삽입하는 과정에서 오류 발생')
+//                                     res.status(500).send('An error occurred while saving the user.');
+//                                 } else {
+//                                     res.render('joincomplete.ejs', {user: req.user});
+//                                 }
+//                             });
+//                         });
+//                     }
+//                 }
+//             });
+//         }
+//     })
+// });
+
+
+
+
+
+
+// app.post('/join', function (req, res) {
+//     logAccess(req, res);
+//     db.collection('login').findOne({id: req.body.id,nickname:req.body.nickname}, function (err, result) {
+//         if (result){
+//             res.status(400).send('exist nickname or id')
+//             // alert('이미 존재합니다!')
+//         }else{
+//             hasher({
+//                 password: req.body.pw
+//             }, (err, pass, salt, hash) => {
+//                 db.collection('login').insertOne({
+//                     id: req.body.id,
+//                     pw: hash,
+//                     salt: salt,
+//                     nickname: req.body.nickname,
+//                     role: "user",
+//                     isallowed: "N"
+//                 })
+//             })
+//             res.render('joincomplete.ejs', {user: req.user})
+//
+//         }
+//     })
+//
+//     //     if (result) {
+//     //         res.status(400).send('이미 사용 중인 ID입니다.');
+//     //     } else {
+//     // 가입 가능한 경우
+//     // 가입 로직을 이어서 처리할 수 있습니다.
+//     // hasher({
+//     //     password: req.body.pw
+//     // }, (err, pass, salt, hash) => {
+//     //     db.collection('login').insertOne({
+//     //         id: req.body.id,
+//     //         pw: hash,
+//     //         salt: salt,
+//     //         nickname: req.body.nickname,
+//     //         role: "user",
+//     //         isallowed: "N"
+//     //     })
+//     // })
+//
+//     // res.render('joincomplete.ejs', {user: req.user})
+//
+// })
 
 
 passport.use(new LocalStrategy({
