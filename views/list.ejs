@@ -144,9 +144,24 @@
     });
 
 </script>
-
 <script>
-    $('#search').click(function () {
+
+    function executeSearch() {
+        var 입력한값 = $('#search-input').val();
+        window.location.replace('/search?value=' + 입력한값);
+    }
+
+    // Enter 키를 눌렀을 때 검색 실행
+    $('#search-input').keyup(function(event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            executeSearch();
+        }
+    });
+
+
+
+    $('#search').click(function(){
         var 입력한값 = $('#search-input').val();
         window.location.replace('/search?value=' + 입력한값)
     });
