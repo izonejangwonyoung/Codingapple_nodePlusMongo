@@ -79,18 +79,31 @@
 
 
 <ul class="list-group list-group-flush">
-    <% for (var i = 0; i < result.length; i++){ %>
-        <li class="list-group-item" id="test">
-            <h4>  <%= result[i].제목 %> </h4>
-            <p>  오늘의 한줄평 : <%= result[i].내용 %> </p>
-            <p>  남긴 시간 : <%= result[i].날짜 %> </p>
-            <p>  남긴 이 : <%= result[i].닉네임 %> </p>
-            <button class="delete" data-id="<%= result[i]._id %>">삭제</button>
-            <%if (user.role=='admin'){%>
-                <button onclick="window.location='/edit/<%= result[i]._id%>'">edit </button>
-            <% }%>
+    <% for (var i = 0; i < posts.length; i++){ %>
+        <% var date = new Date(posts[i].날짜); %>
+        <%
+            var formattedDate = date.getFullYear() + '-' +
+                    ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+                    ('0' + date.getDate()).slice(-2) + ' ' +
+                    ('0' + date.getHours()).slice(-2) + ':' +
+                    ('0' + date.getMinutes()).slice(-2) + ':' +
+                    ('0' + date.getSeconds()).slice(-2);
+        %>
 
-            <!--            <button class="btn btn-secondary chat" data-id="<%= result[i].작성자 %>">채팅하기</button>-->
+
+
+        <li class="list-group-item" id="test">
+            <h4>  <%= posts[i].제목 %> </h4>
+            <p> 오늘의 최애 플리 : <%= posts[i].내용 %> </p>
+            <!--            <p> 남긴 시간 : <%= posts[i].날짜 %> </p>-->
+            <p> 남긴 시간 : <%= formattedDate %> </p>
+            <p> 남긴 이 : <%= posts[i].닉네임 %> </p>
+            <button class="delete" data-id="<%= posts[i]._id %>">삭제</button>
+            <% if (user.role == 'admin'){ %>
+                <button onclick="window.location='/edit/<%= posts[i]._id %>'">edit</button>
+            <% } %>
+
+            <!--            <button class="btn btn-secondary chat" data-id="<%= posts[i].작성자 %>">채팅하기</button>-->
 
         </li>
     <% } %>
@@ -103,19 +116,25 @@
 
 <script>
     $('.delete').click(function (e) {
+        var $parentItem = $(e.target).closest('.list-group-item'); // 선택된 부모 요소를 찾음
+        var itemId = e.target.dataset.id;
+        console.log('삭제버튼 클릭됨')
         $.ajax({
             method: 'DELETE',
             url: '/delete',
-            data: {_id: e.target.dataset.id}
-        }).done((결과) => {
-            // $(e.target).parent('li').fadeOut();
-            // $('#test').load(location.href+' #test')
-            location.reload()
-            console.log('test')
-        }).always(function (xhr,status){
-            $("#text").html("요청이 완료되었습니다.!!")
-        })
+            data: {_id: itemId}
+        }).done(function (결과) {
+            $parentItem.fadeOut('slow', function () {
+                $(this).remove(); // 선택된 부모 요소 제거
+            });
+            console.log('삭제 완료');
+            alert("삭제가 완료되었습니다.");
+        }).always(function (xhr, status) {
+            console.log('항상 실행되는 파트')
+            $("#text").html("요청이 완료되었습니다.!!");
+        });
     });
+
 </script>
 <script>
     $('#search').click(function(){
