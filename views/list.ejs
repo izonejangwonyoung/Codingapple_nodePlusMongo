@@ -76,9 +76,9 @@
     <input class="form-control" id="search-input">
     <button class="input-group-append btn btn-danger" id="search">검색</button>
 </div>
-    <div id="footprint">
-        남겨져 있는 발자취,     <%= count.totalPost%>자국
-    </div>
+<div id="footprint">
+    남겨져 있는 발자취,     <%= count.totalPost%>자국
+</div>
 
 
 <ul class="list-group list-group-flush">
@@ -93,7 +93,7 @@
                 <button onclick="window.location='/edit/<%= posts[i]._id%>'">edit </button>
             <% }%>
 
-<!--            <button class="btn btn-secondary chat" data-id="<%= posts[i].작성자 %>">채팅하기</button>-->
+            <!--            <button class="btn btn-secondary chat" data-id="<%= posts[i].작성자 %>">채팅하기</button>-->
 
         </li>
     <% } %>
@@ -104,22 +104,30 @@
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
+<!--삭제 시 삭제 여부 경고창 표시 후 해당 li 요소 DOM에서 삭제되도록 설정-->
 <script>
     $('.delete').click(function (e) {
+        var $parentItem = $(e.target).closest('.list-group-item'); // 선택된 부모 요소를 찾음
+        var itemId = e.target.dataset.id;
+        console.log('삭제버튼 클릭됨')
         $.ajax({
             method: 'DELETE',
             url: '/delete',
-            data: {_id: e.target.dataset.id}
-        }).done((결과) => {
-            // $(e.target).parent('li').fadeOut();
-            // $('#test').load(location.href+' #test')
-            location.reload()
-            console.log('test')
-        }).always(function (xhr,status){
-            $("#text").html("요청이 완료되었습니다.!!")
-        })
+            data: { _id: itemId }
+        }).done(function (결과) {
+            $parentItem.fadeOut('slow', function () {
+                $(this).remove(); // 선택된 부모 요소 제거
+            });
+            console.log('삭제 완료');
+            alert("삭제가 완료되었습니다.");
+        }).always(function (xhr, status) {
+            console.log('항상 실행되는 파트')
+            $("#text").html("요청이 완료되었습니다.!!");
+        });
     });
+
 </script>
+
 <script>
     $('#search').click(function(){
         var 입력한값 = $('#search-input').val();
