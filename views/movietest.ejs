@@ -102,16 +102,14 @@
             <div class="row">
                 <div class="col-sm-8 col-md-7 py-4">
                     <h4 class="text-white">About</h4>
-                    <p class="text-muted">Add some information about the album below, the author, or any other
-                        background context. Make it a few sentences long so folks can pick up some informative tidbits.
-                        Then, link them off to some social networking sites or contact information.</p>
+                    <p class="text-muted">배운 것들을 써먹어보면서 만들어본 페이지입니다. 별거 없습니다.</p>
                 </div>
                 <div class="col-sm-4 offset-md-1 py-4">
                     <h4 class="text-white">Contact</h4>
                     <ul class="list-unstyled">
                         <li><a href="#" class="text-white">Follow on Twitter</a></li>
                         <li><a href="#" class="text-white">Like on Facebook</a></li>
-                        <li><a href="#" class="text-white">Email me</a></li>
+                        <li><a href="mailto:me@ericshim.me" class="text-white">Email me</a></li>
                     </ul>
                 </div>
             </div>
@@ -141,14 +139,12 @@
     <section class="py-5 text-center container">
         <div class="row py-lg-5">
             <div class="col-lg-6 col-md-8 mx-auto">
-                <h1 class="fw-light">Album example</h1>
-                <p class="lead text-muted">Something short and leading about the collection below—its contents, the
-                    creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it
-                    entirely.</p>
-                <p>
-                    <a href="#" class="btn btn-primary my-2">Main call to action</a>
-                    <a href="#" class="btn btn-secondary my-2">Secondary action</a>
-                </p>
+                <h1 class="fw-light">최신 영화 리스트</h1>
+                <p class="lead text-muted">최신 영화들을 만나보세요</p>
+<!--                <p>-->
+<!--                    <a href="#" class="btn btn-primary my-2">Main call to action</a>-->
+<!--                    <a href="#" class="btn btn-secondary my-2">Secondary action</a>-->
+<!--                </p>-->
             </div>
         </div>
     </section>
@@ -158,19 +154,33 @@
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
 
                 <% for (var i = 0; i < obj.results.length;i++){ %>
-                    <div class="modal fade" id="exampleModal<%= i %>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="exampleModal<%= i %>" tabindex="-1" aria-labelledby="exampleModalLabel"
+                         aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">상세 정보</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <%= obj.results[i].title %>
+                                    <p>제목: <%= obj.results[i].title %></p>
+                                    <p>원제: <%= obj.results[i].original_title %></p>
+                                    <p>개봉일: <%= obj.results[i].release_date %></p>
+                                    <p>설명:
+                                        <% if (obj.results[i].overview.length > 0) { %>
+                                            <%= obj.results[i].overview %>
+                                        <% } else { %>
+                                            내용 없음
+                                        <% } %>
+                                    </p>
+
                                 </div>
+
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary">Save changes</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기
+                                    </button>
+<!--                                    <button type="button" class="btn btn-primary">Save changes</button>-->
                                 </div>
                             </div>
                         </div>
@@ -184,8 +194,9 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
                                         <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal<%= i %>">
-                                            Launch demo modal
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#exampleModal<%= i %>">
+                                            상세 정보 보기
                                         </button>
                                     </div>
                                     <small class="text-muted"><%= obj.results[i].release_date %></small>
@@ -205,9 +216,9 @@
         <p class="float-end mb-1">
             <a href="#">Back to top</a>
         </p>
-        <p class="mb-1">Album example is &copy; Bootstrap, but please download and customize it for yourself!</p>
-        <p class="mb-0">New to Bootstrap? <a href="/">Visit the homepage</a> or read our <a
-                    href="../getting-started/introduction/">getting started guide</a>.</p>
+<!--        <p class="mb-1">Album example is &copy; Bootstrap, but please download and customize it for yourself!</p>-->
+<!--        <p class="mb-0">New to Bootstrap? <a href="/">Visit the homepage</a> or read our <a-->
+<!--                    href="../getting-started/introduction/">getting started guide</a>.</p>-->
     </div>
 </footer>
 
