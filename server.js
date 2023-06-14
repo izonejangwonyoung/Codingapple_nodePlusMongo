@@ -7,7 +7,6 @@ var privateKey = fs.readFileSync("./cert/privkey.pem")
 var certificate = fs.readFileSync("./cert/cert.pem")
 var ca = fs.readFileSync("./cert/chain.pem")
 const credentials = {key: privateKey, cert: certificate, ca: ca}
-
 const app = express()
 app.use(express.static("views"));
 const MongoClient = require('mongodb').MongoClient
